@@ -14,19 +14,24 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js
+      - name: Configurar Node.js con caché
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'  # 🔹 Esto activa la caché de dependencias npm
 
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Ejecutar linter (ESLint)
+      - name: Ejecutar linter
         run: npm run lint
 
-      - name: Ejecutar pruebas (Jest)
-        env:
-          JWT_SECRET: secret
+      - name: Ejecutar pruebas
         run: npm test
 
+      - name: Escaneo de vulnerabilidades con Snyk
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
